@@ -1,0 +1,5 @@
+{
+  "name": "notebook-monorepo",
+  "private": true,
+  "workspaces": ["apps/frontend", "packages/*"]
+}
