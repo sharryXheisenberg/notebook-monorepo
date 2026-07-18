@@ -1,0 +1,46 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'          # path filter — only run when backend files actually change
+      - '.github/workflows/backend-ci-cd.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'
+
+defaults:
+  run:
+    working-directory: apps/backend   # adjust to '.' if this repo is backend-only, not the monorepo
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run tests
+        run: mvn test -B
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Render deploys automatically on push when auto-deploy is enabled on the service —
+      # this step just triggers it explicitly via a deploy hook, so the pipeline reflects
+      # whether the deploy actually fired rather than relying on Render's own webhook silently.
+      - name: Trigger Render deploy
+        run: |
+          curl -f "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
