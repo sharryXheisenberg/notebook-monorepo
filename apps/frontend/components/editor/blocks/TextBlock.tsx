@@ -3,7 +3,10 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import TextAlign from "@tiptap/extension-text-align";
+import Link from "@tiptap/extension-link";
 import { useEffect } from "react";
+import { RichTextToolbar } from "@/components/editor/toolbar/RichTextToolbar";
 import type { TextBlockContent } from "@/types/block";
 
 interface TextBlockProps {
@@ -24,6 +27,8 @@ export function TextBlock({ content, onChange }: TextBlockProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: "Write notes, or type / for commands…" }),
     ],
     content: parsed.markdown,
@@ -42,8 +47,11 @@ export function TextBlock({ content, onChange }: TextBlockProps) {
   }, [content]);
 
   return (
-    <div className="prose prose-invert prose-sm max-w-none">
-      <EditorContent editor={editor} />
+    <div>
+      <RichTextToolbar editor={editor} />
+      <div className="prose prose-invert prose-sm max-w-none">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }
