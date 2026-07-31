@@ -60,6 +60,12 @@ export function BlockEditor({ notebookId, blocks }: BlockEditorProps) {
     []
   );
 
+  // Only the very first TEXT block in the notebook gets autofocus — per bug report #3,
+  // opening a notebook should drop the cursor straight into the content, Medium-style,
+  // rather than requiring an extra click. Autofocusing every TextBlock instance would
+  // fight over focus if there were more than one on the page.
+  const firstTextBlockId = blocks.find((b) => b.blockType === "TEXT")?.id;
+
   return (
     <div className="space-y-3 max-w-3xl mx-auto py-8">
       {blocks.map((block) => (
@@ -71,6 +77,7 @@ export function BlockEditor({ notebookId, blocks }: BlockEditorProps) {
               <TextBlock
                 content={block.content}
                 onChange={(content) => handleContentChange(block.id, content)}
+                autoFocus={block.id === firstTextBlockId}
               />
             )}
             {block.blockType === "CODE" && (
@@ -90,11 +97,17 @@ export function BlockEditor({ notebookId, blocks }: BlockEditorProps) {
         </div>
       ))}
 
-      <button
-        onClick={() => setSlashMenuFor("new")}
-        className="text-ink-muted text-sm hover:text-ink-primary relative"
-      >
-        + Type / for a new block
+      {/* Trigger and SlashMenu are siblings inside this div, not nested — a <button>
+          cannot legally contain another <button>, and SlashMenu renders its own buttons.
+          The original version nested them, which is invalid HTML and threw a hydration
+          error in the browser console. */}
+      <div className="relative">
+        <button
+          onClick={() => setSlashMenuFor("new")}
+          className="text-ink-muted text-sm hover:text-ink-primary"
+        >
+          + Type / for a new block
+        </button>
         {slashMenuFor === "new" && (
           <SlashMenu
             position={{ top: 24, left: 0 }}
@@ -102,7 +115,7 @@ export function BlockEditor({ notebookId, blocks }: BlockEditorProps) {
             onClose={() => setSlashMenuFor(null)}
           />
         )}
-      </button>
+      </div>
     </div>
   );
 }

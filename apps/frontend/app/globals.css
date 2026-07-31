@@ -20,3 +20,63 @@
     }
   }
 }
+
+/* Text block editor content — styled directly rather than relying on Tailwind Typography
+   (which was never installed), so contrast against the dark theme is guaranteed rather
+   than falling back to unstyled browser defaults. */
+.notebook-editor-content {
+  background: theme('colors.surface');
+  border: 1px solid theme('colors.border.subtle');
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.notebook-editor-content .ProseMirror {
+  color: theme('colors.ink.primary');
+  caret-color: theme('colors.signal.DEFAULT');
+  outline: none;
+  min-height: 60px;
+  line-height: 1.6;
+}
+
+.notebook-editor-content .ProseMirror p {
+  margin: 0 0 0.5em;
+}
+
+.notebook-editor-content .ProseMirror h1,
+.notebook-editor-content .ProseMirror h2,
+.notebook-editor-content .ProseMirror h3 {
+  color: theme('colors.ink.primary');
+  font-weight: 600;
+  margin: 0.4em 0;
+}
+
+.notebook-editor-content .ProseMirror ul,
+.notebook-editor-content .ProseMirror ol {
+  padding-left: 1.4em;
+  margin: 0.4em 0;
+}
+
+.notebook-editor-content .ProseMirror code {
+  background: theme('colors.surface-raised');
+  color: theme('colors.annotation.DEFAULT');
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-family: var(--font-jetbrains-mono);
+  font-size: 0.9em;
+}
+
+.notebook-editor-content .ProseMirror a {
+  color: theme('colors.signal.DEFAULT');
+  text-decoration: underline;
+}
+
+/* Placeholder text (shown when a text block is empty) — must be visibly distinct from
+   real content, per Tiptap's Placeholder extension convention (data-placeholder attribute) */
+.notebook-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: theme('colors.ink.muted');
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

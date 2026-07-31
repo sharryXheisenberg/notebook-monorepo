@@ -1,6 +1,7 @@
 "use client";
 
 import type { Editor } from "@tiptap/react";
+import { useEffect, useState } from "react";
 import { Bold, Italic, List, ListOrdered, AlignLeft, AlignRight, Link2, Code } from "lucide-react";
 
 interface RichTextToolbarProps {
@@ -8,11 +9,28 @@ interface RichTextToolbarProps {
 }
 
 /**
- * The rich Markdown toolbar from FRD §3.1 (bold, italic, lists, alignment, embed) — was
- * previously missing entirely; TextBlock rendered Tiptap with no visible formatting controls,
- * so nothing beyond typing plain text was actually reachable by a user.
+ * The rich Markdown toolbar from FRD §3.1 (bold, italic, lists, alignment, embed).
+ *
+ * Two fixes here versus the original version:
+ * 1. onMouseDown with preventDefault on every button — without this, clicking a button
+ *    blurs the editor and collapses its selection *before* onClick fires, so commands
+ *    silently ran against an empty/lost selection and appeared to do nothing.
+ * 2. A transaction listener forces a re-render on every selection change, so the
+ *    active-state highlighting (e.g. Bold lit up while your cursor sits in bold text)
+ *    actually tracks the cursor instead of only updating when content changes.
  */
 export function RichTextToolbar({ editor }: RichTextToolbarProps) {
+  const [, forceRerender] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+    const rerender = () => forceRerender((n) => n + 1);
+    editor.on("transaction", rerender);
+    return () => {
+      editor.off("transaction", rerender);
+    };
+  }, [editor]);
+
   if (!editor) return null;
 
   const buttons = [
@@ -39,6 +57,8 @@ export function RichTextToolbar({ editor }: RichTextToolbarProps) {
       {buttons.map(({ icon: Icon, label, action, active }) => (
         <button
           key={label}
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={action}
           title={label}
           aria-label={label}

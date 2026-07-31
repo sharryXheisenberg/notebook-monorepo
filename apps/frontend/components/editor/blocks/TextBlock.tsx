@@ -12,6 +12,7 @@ import type { TextBlockContent } from "@/types/block";
 interface TextBlockProps {
   content: string; // raw JSON string, parsed to TextBlockContent
   onChange: (content: string) => void;
+  autoFocus?: boolean;
 }
 
 /**
@@ -20,11 +21,20 @@ interface TextBlockProps {
  * matches the backend's data model (Block is the unit of storage, not a single ProseMirror
  * doc spanning the notebook), which is what makes reordering/inserting blocks a simple
  * array operation instead of ProseMirror transaction surgery.
+ *
+ * Styling note: this used to rely on Tailwind Typography's "prose prose-invert" classes,
+ * but that plugin was never actually installed in tailwind.config.ts — so those classes were
+ * no-ops, leaving the editor with no explicit text color at all against the dark background.
+ * Fixed by styling .ProseMirror directly in globals.css instead of depending on a plugin
+ * that isn't there.
  */
-export function TextBlock({ content, onChange }: TextBlockProps) {
+export function TextBlock({ content, onChange, autoFocus = false }: TextBlockProps) {
   const parsed: TextBlockContent = safeParse(content);
 
   const editor = useEditor({
+    immediatelyRender: false, // required in Next.js App Router — otherwise Tiptap renders
+                               // during SSR and mismatches the client render on hydration
+    autofocus: autoFocus ? "start" : false,
     extensions: [
       StarterKit,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -49,7 +59,7 @@ export function TextBlock({ content, onChange }: TextBlockProps) {
   return (
     <div>
       <RichTextToolbar editor={editor} />
-      <div className="prose prose-invert prose-sm max-w-none">
+      <div className="notebook-editor-content">
         <EditorContent editor={editor} />
       </div>
     </div>
