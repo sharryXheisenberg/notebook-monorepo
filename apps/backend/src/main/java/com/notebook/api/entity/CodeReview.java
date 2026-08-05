@@ -10,6 +10,8 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "code_reviews")
@@ -22,9 +24,11 @@ public class CodeReview {
 
     @Id
     @GeneratedValue
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
 
     @Column(name = "block_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID blockId;
 
     @Column(name = "line_number", nullable = false)

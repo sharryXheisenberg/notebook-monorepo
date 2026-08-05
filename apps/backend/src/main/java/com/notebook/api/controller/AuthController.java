@@ -1,7 +1,9 @@
 package com.notebook.api.controller;
 
+import com.notebook.api.dto.request.ForgotPasswordReq;
 import com.notebook.api.dto.request.LoginReq;
 import com.notebook.api.dto.request.RegisterReq;
+import com.notebook.api.dto.request.ResetPasswordReq;
 import com.notebook.api.dto.response.JwtAuthRes;
 import com.notebook.api.service.AuthService;
 import jakarta.validation.Valid;
@@ -25,5 +27,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthRes> login(@Valid @RequestBody LoginReq req) {
         return ResponseEntity.ok(authService.login(req));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordReq req) {
+        authService.requestPasswordReset(req);
+        // Always 200, regardless of whether the email exists — see AuthService's javadoc
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordReq req) {
+        authService.resetPassword(req);
+        return ResponseEntity.ok().build();
     }
 }

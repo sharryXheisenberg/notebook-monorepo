@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "review_comments")
@@ -21,12 +23,15 @@ public class ReviewComment {
 
     @Id
     @GeneratedValue
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
 
     @Column(name = "code_review_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID codeReviewId;
 
     @Column(name = "author_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID authorId;
 
     @Column(nullable = false, columnDefinition = "TEXT")

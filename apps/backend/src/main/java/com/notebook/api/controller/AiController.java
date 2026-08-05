@@ -21,6 +21,8 @@ public class AiController {
     private final AiService aiService;
     private final AuthenticatedUserResolver userResolver;
 
+
+
     @PostMapping("/prompt")
     public ResponseEntity<AiPromptRes> prompt(Authentication auth, @Valid @RequestBody AiPromptReq req) {
         // RateLimitExceededException (429) is thrown inside the service and handled by

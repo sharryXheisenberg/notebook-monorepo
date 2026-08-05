@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "share_links")
@@ -21,9 +23,11 @@ public class ShareLink {
 
     @Id
     @GeneratedValue
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
 
     @Column(name = "notebook_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID notebookId;
 
     // Public URL segment: /share/{slug} — see LLD §1 ShareLink

@@ -20,6 +20,7 @@
     <properties>
         <java.version>17</java.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok.version>1.18.42</lombok.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <bucket4j.version>8.10.1</bucket4j.version>
         <jjwt.version>0.12.5</jjwt.version>
@@ -101,6 +102,18 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- PDF export (ExportController) - OpenPDF is the actively maintained,
              LGPL/MPL-licensed fork of the old iText 4, genuinely free for this use -->
         <dependency>
@@ -110,9 +123,11 @@
         </dependency>
 
         <!-- Boilerplate reduction -->
+        <!-- Boilerplate reduction -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 

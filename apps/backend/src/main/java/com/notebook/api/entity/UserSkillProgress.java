@@ -10,6 +10,8 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "user_skill_progress", uniqueConstraints = {
@@ -24,12 +26,15 @@ public class UserSkillProgress {
 
     @Id
     @GeneratedValue
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID userId;
 
     @Column(name = "skill_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID skillId;
 
     @Enumerated(EnumType.STRING)
