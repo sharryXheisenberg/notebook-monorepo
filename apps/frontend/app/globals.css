@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light theme (default) — "paper" background, dark ink, same amber/teal accent identity
+   as dark mode but deepened slightly for AA contrast against a light background. */
+:root {
+  --color-canvas: 247 245 241;
+  --color-surface: 255 255 255;
+  --color-surface-raised: 240 237 231;
+  --color-border-subtle: 221 217 208;
+  --color-ink-primary: 31 33 41;
+  --color-ink-muted: 107 111 122;
+  --color-annotation: 201 127 30;
+  --color-annotation-muted: 138 106 53;
+  --color-signal: 47 143 134;
+  color-scheme: light;
+}
+
+/* Dark theme — the original palette this app was designed with */
+.dark {
+  --color-canvas: 20 22 28;
+  --color-surface: 28 31 39;
+  --color-surface-raised: 36 40 51;
+  --color-border-subtle: 42 46 56;
+  --color-ink-primary: 232 230 225;
+  --color-ink-muted: 156 160 172;
+  --color-annotation: 232 163 61;
+  --color-annotation-muted: 138 106 53;
+  --color-signal: 79 184 175;
+  color-scheme: dark;
+}
+
 @layer base {
   body {
     @apply bg-canvas text-ink-primary;
@@ -9,8 +38,17 @@
 
   /* Visible keyboard focus everywhere — not just default browser outline removal */
   :focus-visible {
-    outline: 2px solid theme('colors.signal.DEFAULT');
+    outline: 2px solid rgb(var(--color-signal));
     outline-offset: 2px;
+  }
+
+  /* List markers explicitly inherit the theme's text color. Without this, browsers render
+     native ::marker color using their own dark/light UI heuristics rather than currentColor
+     — this is the actual cause of bullets/numbers looking like a mismatched dark purple
+     against the dark theme, not a Tailwind or component bug. The color-scheme declarations
+     above (on :root/.dark) fix most of this on their own; this rule is the explicit backstop. */
+  ::marker {
+    color: inherit;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -22,18 +60,20 @@
 }
 
 /* Text block editor content — styled directly rather than relying on Tailwind Typography
-   (which was never installed), so contrast against the dark theme is guaranteed rather
-   than falling back to unstyled browser defaults. */
+   (not installed), so contrast is guaranteed rather than falling back to browser defaults.
+   Uses rgb(var(--x)) directly rather than Tailwind's theme() helper: theme() only resolves
+   the "<alpha-value>" placeholder inside Tailwind-generated utility classes, not in plain
+   custom CSS — calling it here would output literally invalid CSS. */
 .notebook-editor-content {
-  background: theme('colors.surface');
-  border: 1px solid theme('colors.border.subtle');
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-border-subtle));
   border-radius: 8px;
   padding: 12px 14px;
 }
 
 .notebook-editor-content .ProseMirror {
-  color: theme('colors.ink.primary');
-  caret-color: theme('colors.signal.DEFAULT');
+  color: rgb(var(--color-ink-primary));
+  caret-color: rgb(var(--color-signal));
   outline: none;
   min-height: 60px;
   line-height: 1.6;
@@ -46,20 +86,33 @@
 .notebook-editor-content .ProseMirror h1,
 .notebook-editor-content .ProseMirror h2,
 .notebook-editor-content .ProseMirror h3 {
-  color: theme('colors.ink.primary');
+  color: rgb(var(--color-ink-primary));
   font-weight: 600;
   margin: 0.4em 0;
 }
 
-.notebook-editor-content .ProseMirror ul,
-.notebook-editor-content .ProseMirror ol {
+/* Tailwind's preflight reset strips list-style entirely (list-style: none) — this restores
+   visible bullets/numbers, which is the other half of the "can't see list markers" bug
+   alongside the color-scheme fix above. */
+.notebook-editor-content .ProseMirror ul {
+  list-style-type: disc;
   padding-left: 1.4em;
   margin: 0.4em 0;
 }
 
+.notebook-editor-content .ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.4em;
+  margin: 0.4em 0;
+}
+
+.notebook-editor-content .ProseMirror li::marker {
+  color: rgb(var(--color-ink-primary));
+}
+
 .notebook-editor-content .ProseMirror code {
-  background: theme('colors.surface-raised');
-  color: theme('colors.annotation.DEFAULT');
+  background: rgb(var(--color-surface-raised));
+  color: rgb(var(--color-annotation));
   padding: 0.1em 0.35em;
   border-radius: 4px;
   font-family: var(--font-jetbrains-mono);
@@ -67,16 +120,32 @@
 }
 
 .notebook-editor-content .ProseMirror a {
-  color: theme('colors.signal.DEFAULT');
+  color: rgb(var(--color-signal));
   text-decoration: underline;
 }
 
-/* Placeholder text (shown when a text block is empty) — must be visibly distinct from
-   real content, per Tiptap's Placeholder extension convention (data-placeholder attribute) */
+/* Placeholder text (shown when a text block is empty) */
 .notebook-editor-content .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  color: theme('colors.ink.muted');
+  color: rgb(var(--color-ink-muted));
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* Toast entrance animation — written directly rather than depending on the
+   tailwindcss-animate plugin, which was referenced by class name but never installed. */
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-enter {
+  animation: toast-enter 0.2s ease-out;
 }

@@ -18,3 +18,12 @@ export interface LoginReq {
   email: string;
   password: string;
 }
+
+export interface ForgotPasswordReq {
+  email: string;
+}
+
+export interface ResetPasswordReq {
+  token: string;
+  newPassword: string;
+}

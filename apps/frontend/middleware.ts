@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const TOKEN_COOKIE = "notebook_jwt";
-const PUBLIC_PATHS = ["/login", "/register", "/share"];
+const PUBLIC_PATHS = ["/login", "/register", "/share", "/forgot-password", "/reset-password"];
 
 // Route guard: redirects unauthenticated users away from (workspace) routes, and
 // authenticated users away from login/register. This is a UX convenience, NOT the real

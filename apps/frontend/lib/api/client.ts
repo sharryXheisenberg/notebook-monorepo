@@ -41,12 +41,20 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     throw new ApiError(response.status, errorBody);
   }
 
-  // 204 No Content responses (delete, reorder) have no body to parse
+  // Some endpoints (forgot-password, reset-password) return 200 with an empty body by
+  // design — e.g. forgot-password never reveals whether the email exists, so there's
+  // nothing to send back. Reading as text first and only parsing if non-empty handles
+  // both that case and the explicit 204 case below, instead of assuming every non-204
+  // response has a JSON body to parse.
   if (response.status === 204) {
     return undefined as T;
   }
 
-  return response.json() as Promise<T>;
+  const text = await response.text();
+  if (!text) {
+    return undefined as T;
+  }
+  return JSON.parse(text) as T;
 }
 
 /**

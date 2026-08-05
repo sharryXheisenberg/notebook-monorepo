@@ -8,12 +8,10 @@ import { setStoredUser } from "@/lib/auth/session";
 import { ApiError } from "@/types/api-error";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useToast } from "@/components/ui/Toast";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +27,6 @@ export default function LoginPage() {
       setStoredUser(res.user);
       router.push("/notebooks");
     } catch (err) {
-      // Deliberately generic — matches AuthServiceImpl's identical message for
-      // "wrong password" vs "no such user" on the backend.
       setError(err instanceof ApiError ? "Invalid email or password" : "Something went wrong");
     } finally {
       setIsLoading(false);
@@ -46,14 +42,11 @@ export default function LoginPage() {
                onChange={(e) => setEmail(e.target.value)} required />
         <Input type="password" placeholder="Password" value={password}
                onChange={(e) => setPassword(e.target.value)} required />
+
         <div className="text-right -mt-2">
-          <button
-            type="button"
-            onClick={() => showToast("Password reset isn't available yet — this is coming in a future update.", "info")}
-            className="text-xs text-ink-muted hover:text-ink-primary underline"
-          >
+          <Link href="/forgot-password" className="text-xs text-ink-muted hover:text-ink-primary underline">
             Forgot password?
-          </button>
+          </Link>
         </div>
 
         {error && <p className="text-sm text-red-300">{error}</p>}
