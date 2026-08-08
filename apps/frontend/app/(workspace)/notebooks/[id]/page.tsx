@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { blocksApi } from "@/lib/api/blocks";
 import { notebooksApi } from "@/lib/api/notebooks";
 import { shareApi } from "@/lib/api/share";
@@ -19,6 +19,7 @@ import type { ReviewComment } from "@/types/review";
 
 export default function NotebookPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const { blocksByNotebook, setBlocks } = useBlockStore();
   const { notebooks, setNotebooks } = useNotebookStore();
   const notebook = notebooks.find((n) => n.id === id);
@@ -29,15 +30,19 @@ export default function NotebookPage() {
   const user = getStoredUser();
 
   useEffect(() => {
-    // Fetch both blocks and the notebook list — previously the notebook object only existed
-    // if you'd visited the /notebooks list page first in this session; navigating straight
-    // to a notebook URL (e.g. a bookmark, or a page refresh) left the title blank.
-    Promise.all([blocksApi.list(id), notebooksApi.list()]).then(([blocks, allNotebooks]) => {
-      setBlocks(id, blocks);
-      setNotebooks(allNotebooks);
-      setIsLoading(false);
-    });
-  }, [id, setBlocks, setNotebooks]);
+    Promise.all([blocksApi.list(id), notebooksApi.list()])
+      .then(([blocks, allNotebooks]) => {
+        setBlocks(id, blocks);
+        setNotebooks(allNotebooks);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        if (err?.status === 403 || err?.status === 401) {
+          router.push("/login");
+        }
+      });
+  }, [id, setBlocks, setNotebooks, router]);
 
   async function handleShare() {
     try {
@@ -51,7 +56,10 @@ export default function NotebookPage() {
       // Previously uncaught — a failed request here silently aborted with no UI feedback
       // at all, same bug class as the earlier forgot-password issue.
       console.error("Failed to create share link:", err);
-      showToast("Couldn't create a share link — check your connection and try again.", "info");
+      showToast(
+        "Couldn't create a share link — check your connection and try again.",
+        "info",
+      );
     }
   }
 
@@ -64,7 +72,9 @@ export default function NotebookPage() {
   }
 
   const blocks = blocksByNotebook[id] ?? [];
-  const collaborators = user ? [{ id: user.id, username: user.username, isOnline: true }] : [];
+  const collaborators = user
+    ? [{ id: user.id, username: user.username, isOnline: true }]
+    : [];
 
   return (
     <div className="flex">
@@ -76,10 +86,17 @@ export default function NotebookPage() {
             <h1 className="text-lg font-medium text-ink-muted">Notebook</h1>
           )}
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => downloadExport(id, "md", `${notebook?.title ?? "notebook"}.md`)}>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                downloadExport(id, "md", `${notebook?.title ?? "notebook"}.md`)
+              }
+            >
               Export MD
             </Button>
-            <Button variant="secondary" onClick={handleShare}>Share</Button>
+            <Button variant="secondary" onClick={handleShare}>
+              Share
+            </Button>
           </div>
         </div>
 
